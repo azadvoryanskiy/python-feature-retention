@@ -39,24 +39,30 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from matplotlib import font_manager
 
 ROOT = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
 IMG = ROOT / "img"
 
-BLUE, ORANGE, GREY = "#2a78d6", "#eb6834", "#c9c8c3"
+# The portfolio's colours: ink background, volt for the thing to look at, greys for
+# the rest. Onest ships in fonts/ (SIL Open Font License).
+VOLT, GREY, DARK_GREY, MUTED = "#D6FA50", "#8C8C87", "#4A4A47", "#8C8C87"
+for font in (ROOT / "fonts").glob("*.ttf"):
+    font_manager.fontManager.addfont(font)
 plt.rcParams.update({
-    "font.family": "Helvetica Neue", "font.size": 11,
+    "font.family": ["Onest", "Helvetica Neue", "DejaVu Sans"], "font.size": 11,
+    "text.color": "#FFFFFF", "axes.labelcolor": MUTED, "legend.labelcolor": "#FFFFFF",
     "axes.spines.top": False, "axes.spines.right": False, "axes.spines.left": False,
-    "axes.edgecolor": "#e6e5e1", "axes.grid": True, "axes.grid.axis": "y",
-    "grid.color": "#e6e5e1", "axes.axisbelow": True,
-    "xtick.color": "#52514e", "ytick.color": "#52514e", "xtick.major.size": 0, "ytick.major.size": 0,
-    "figure.facecolor": "#fcfcfb", "axes.facecolor": "#fcfcfb", "savefig.facecolor": "#fcfcfb",
+    "axes.edgecolor": "#2A2A2A", "axes.grid": True, "axes.grid.axis": "y",
+    "grid.color": "#2A2A2A", "axes.axisbelow": True,
+    "xtick.color": MUTED, "ytick.color": MUTED, "xtick.major.size": 0, "ytick.major.size": 0,
+    "figure.facecolor": "#0A0A0A", "axes.facecolor": "#0A0A0A", "savefig.facecolor": "#0A0A0A",
 })
 
 
 def title(ax, headline, sub):
-    ax.set_title(f"{headline}\n", loc="left", fontsize=14, fontweight="bold", pad=22)
-    ax.text(0, 1.05, sub, transform=ax.transAxes, fontsize=10.5, color="#52514e")
+    ax.set_title(f"{headline}\n", loc="left", fontsize=14, fontweight=600, pad=22)
+    ax.text(0, 1.05, sub, transform=ax.transAxes, fontsize=10.5, color=MUTED)
 
 
 def pct_axis(ax, top):
@@ -116,7 +122,7 @@ by_features
 
 # %%
 fig, ax = plt.subplots(figsize=(8, 4.2))
-bars = ax.bar(by_features.index.astype(str), by_features["came_back"], width=0.5, color=BLUE)
+bars = ax.bar(by_features.index.astype(str), by_features["came_back"], width=0.5, color=VOLT)
 ax.bar_label(bars, labels=[f"{v:.1f}%" for v in by_features["came_back"]], padding=4)
 pct_axis(ax, 35)
 ax.set_xlabel("Features used in the first week")
@@ -150,7 +156,7 @@ pd.crosstab(people["active_days"], people["breadth"])
 # %%
 fig, ax = plt.subplots(figsize=(8, 4.4))
 width = 0.24
-colours = [GREY, "#86b6ef", BLUE]
+colours = [DARK_GREY, GREY, VOLT]
 for i, (column, colour) in enumerate(zip(same_days.columns, colours)):
     x = [j + (i - 1) * (width + 0.03) for j in range(len(same_days))]
     bars = ax.bar(x, same_days[column], width=width, color=colour, label=column)
@@ -192,7 +198,7 @@ paths
 # %%
 ladder = paths.drop("Other paths")
 fig, ax = plt.subplots(figsize=(8, 4.2))
-bars = ax.bar(ladder.index, ladder["came_back"], width=0.5, color=[ORANGE, BLUE, BLUE])
+bars = ax.bar(ladder.index, ladder["came_back"], width=0.5, color=[VOLT, GREY, GREY])
 ax.bar_label(bars, labels=[f"{v:.1f}%\n{n:,} accounts" for v, n in
                            zip(ladder["came_back"], ladder["accounts"])], padding=4, fontsize=9.5)
 pct_axis(ax, 35)
@@ -222,16 +228,16 @@ third
 # %%
 fig, ax = plt.subplots(figsize=(8, 4))
 ordered = third.sort_values("accounts")
-bars = ax.barh(ordered.index, ordered["came_back"], height=0.5, color=BLUE)
+bars = ax.barh(ordered.index, ordered["came_back"], height=0.5, color=VOLT)
 ax.bar_label(bars, labels=[f"{v:.1f}%" for v in ordered["came_back"]], padding=4)
 ax.grid(axis="x"); ax.grid(axis="y", visible=False)
 ax.set_xlim(0, 32)
 ax.xaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
 only_two = paths.loc["Repo and pushed code", "came_back"]
-ax.axvline(only_two, color="#52514e", linestyle="--", linewidth=1)
+ax.axvline(only_two, color=MUTED, linestyle="--", linewidth=1)
 ax.set_ylim(-1.2, len(ordered) - 0.5)
 ax.text(only_two + 0.4, -0.85, f"repo and code only: {only_two:.1f}%",
-        ha="left", va="center", fontsize=9.5, color="#52514e")
+        ha="left", va="center", fontsize=9.5, color=MUTED)
 title(ax, "Which third feature matters less than having one",
       "Accounts that created a repo, pushed code and used exactly one more feature")
 fig.tight_layout()
